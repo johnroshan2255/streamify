@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Allow cleartext (HTTP) for:
+     1) localhost - torrent streamer http://127.0.0.1:PORT/stream
+     2) API and image hosts - cover images from search API are often served over HTTP -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">movie-stream-orpin.vercel.app</domain>
+        <domain includeSubdomains="true">vercel.app</domain>
+        <domain includeSubdomains="true">img.yts.mx</domain>
+        <domain includeSubdomains="true">image.tmdb.org</domain>
+    </domain-config>
+    <!-- Fallback: permit cleartext for any host so HTTP image URLs work in release builds -->
+    <base-config cleartextTrafficPermitted="true"/>
+</network-security-config>

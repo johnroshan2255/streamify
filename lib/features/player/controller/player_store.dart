@@ -25,6 +25,19 @@ class PlayerStore {
   final _progress = Observable(0.0);
   double get progress => _progress.value;
 
+  /// Plugin state: Pending, Metadata, Downloading, Ready, Seeding, etc. Shown on loading UI.
+  final _pluginState = Observable<String>('');
+  String get pluginState => _pluginState.value;
+
+  final _peers = Observable(0);
+  int get peers => _peers.value;
+
+  final _downloadSpeed = Observable<int>(0);
+  int get downloadSpeed => _downloadSpeed.value;
+
+  final _eta = Observable<int>(-1);
+  int get eta => _eta.value;
+
   TorrentStreamSession? _session;
 
   /// Start stream. Stops any existing session first (reference pattern).
@@ -33,6 +46,10 @@ class PlayerStore {
       _status.value = StreamStatus.initializing;
       _errorMessage.value = null;
       _statusMessage.value = 'Starting torrent stream...';
+      _pluginState.value = 'Starting...';
+      _peers.value = 0;
+      _downloadSpeed.value = 0;
+      _eta.value = -1;
     });
 
     try {
@@ -74,17 +91,23 @@ class PlayerStore {
         if (statusMap['progress'] is num) {
           progressVal = (statusMap['progress'] as num).toDouble();
         }
-
-        print("status: ${statusMap['state']}");
-        print("progress: ${statusMap['progress']}");
-        print("streamUrl: ${statusMap['url']}");
-        print("downloadSpeed: ${statusMap['downloadSpeed']}");
-        print("peers: ${statusMap['peers']}");
-        print("seeds: ${statusMap['seeds']}");
-        print("eta: ${statusMap['eta']}");
+        final stateStr = statusMap['state']?.toString() ?? 'Pending';
+        final peersVal = statusMap['peers'] is int ? statusMap['peers'] as int : 0;
+        final speedVal = statusMap['downloadSpeed'] is int
+            ? statusMap['downloadSpeed'] as int
+            : (statusMap['downloadSpeed'] is num
+                ? (statusMap['downloadSpeed'] as num).toInt()
+                : 0);
+        final etaVal = statusMap['eta'] is int
+            ? statusMap['eta'] as int
+            : (statusMap['eta'] is num ? (statusMap['eta'] as num).toInt() : -1);
 
         runInAction(() {
           _progress.value = progressVal;
+          _pluginState.value = stateStr;
+          _peers.value = peersVal;
+          _downloadSpeed.value = speedVal;
+          _eta.value = etaVal;
           _statusMessage.value =
               'Buffering... ${(progressVal * 100).toStringAsFixed(1)}%';
         });
@@ -128,6 +151,10 @@ class PlayerStore {
         _status.value = StreamStatus.initial;
         _statusMessage.value = null;
         _progress.value = 0;
+        _pluginState.value = '';
+        _peers.value = 0;
+        _downloadSpeed.value = 0;
+        _eta.value = -1;
       });
     } catch (_) {}
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mobx/mobx.dart';
 
 import '../../../../core/network/dio_client.dart';
@@ -9,6 +11,10 @@ class SearchStore {
   SearchStore(this._repository);
 
   final TorrentSearchRepository _repository;
+
+  static const Duration _searchDebounce = Duration(milliseconds: 400);
+
+  Timer? _debounceTimer;
 
   final _query = Observable('');
   String get query => _query.value;
@@ -22,14 +28,35 @@ class SearchStore {
   final _error = Observable<String?>(null);
   String? get error => _error.value;
 
+  /// Updates query and schedules a debounced search (search on change).
   void setQuery(String value) {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+
     runInAction(() {
       _query.value = value;
       _error.value = null;
     });
+
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      runInAction(() {
+        _torrents.clear();
+        _isLoading.value = false;
+      });
+      return;
+    }
+
+    _debounceTimer = Timer(_searchDebounce, () {
+      _debounceTimer = null;
+      search();
+    });
   }
 
   Future<void> search() async {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+
     final q = _query.value.trim();
     runInAction(() {
       if (q.isEmpty) {

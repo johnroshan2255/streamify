@@ -33,8 +33,10 @@ android {
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            // Prevent R8/ProGuard from stripping code used by cached_network_image/path_provider (images not loading on device release)
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

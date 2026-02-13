@@ -68,39 +68,71 @@ class _PlayerPageState extends State<PlayerPage> {
 
             if (_store.status == StreamStatus.initializing ||
                 _store.status == StreamStatus.buffering) {
-              return _buildBuffering(
-                _store.statusMessage ?? 'Initializing...',
-                _store.progress,
-              );
+              return _buildBuffering(store: _store);
             }
 
-            return _buildBuffering(
-              _store.statusMessage ?? 'Loading...',
-              _store.progress,
-            );
+            return _buildBuffering(store: _store);
           },
         ),
       ),
     );
   }
 
-  Widget _buildBuffering(String message, double progress) {
+  Widget _buildBuffering({required PlayerStore store}) {
+    final message = store.statusMessage ?? 'Loading...';
+    final progress = store.progress;
+    final state = store.pluginState;
+    final peers = store.peers;
+    final speedKb = store.downloadSpeed ~/ 1024;
+    final eta = store.eta;
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(color: AppTheme.accentRed),
-          const SizedBox(height: 20),
-          Text(
-            progress > 0
-                ? '$message ${(progress * 100).toStringAsFixed(0)}%'
-                : message,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 16,
-            ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: AppTheme.accentRed),
+              const SizedBox(height: 24),
+              Text(
+                progress > 0
+                    ? '$message ${(progress * 100).toStringAsFixed(1)}%'
+                    : message,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (state.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Status: $state',
+                  style: const TextStyle(
+                    color: AppTheme.accentRed,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+              if (peers > 0 || speedKb > 0 || eta >= 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  [
+                    if (peers > 0) 'Peers: $peers',
+                    if (speedKb > 0) 'Speed: ${speedKb} KB/s',
+                    if (eta >= 0) 'ETA: ${eta}s',
+                  ].join('  •  '),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
