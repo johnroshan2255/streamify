@@ -1,0 +1,46 @@
+name: streamify
+description: A production-ready Flutter movie streaming app with torrent search and streaming.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Video & streaming
+  flutter_go_torrent_streamer: ^0.0.8
+  video_player: ^2.10.1
+  chewie: ^1.12.1
+  wakelock_plus: ^1.4.0
+  screen_brightness: ^2.1.7
+  flutter_volume_controller: ^1.3.4
+
+  # Core
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  dio: ^5.9.1
+  http: ^1.6.0
+  shared_preferences: ^2.5.3
+  android_intent_plus: ^6.0.0
+
+  # State management
+  mobx: ^2.6.0
+  flutter_mobx: ^2.3.0
+
+  # UI & utils
+  bot_toast: ^4.1.3
+  json_annotation: ^4.9.0
+  cached_network_image: ^3.3.1
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
